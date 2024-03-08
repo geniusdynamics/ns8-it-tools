@@ -1,0 +1,33 @@
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+[Unit]
+Description=Podman  it-tools-app.service
+BindsTo=it-tools.service
+After=it-tools.service
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=%S/state/environment
+EnvironmentFile=-%S/state/smarthost.env
+WorkingDirectory=%S/state
+Restart=always
+TimeoutStopSec=70
+ExecStartPre=/bin/mkdir -p config
+ExecStartPre=/bin/rm -f %t/it-tools-app.pid %t/it-tools-app.ctr-id
+ExecStartPre=-runagent discover-smarthost
+ExecStart=/usr/bin/podman run --conmon-pidfile %t/it-tools-app.pid \
+    --cidfile %t/it-tools-app.ctr-id --cgroups=no-conmon \
+    --pod-id-file %t/it-tools.pod-id --replace -d --name  it-tools-app \
+    ${IT_TOOLS_IMAGE}
+ExecStop=/usr/bin/podman stop --ignore --cidfile %t/it-tools-app.ctr-id -t 10
+ExecReload=/usr/bin/podman kill -s HUP it-tools-app
+SyslogIdentifier=%u
+ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/it-tools-app.ctr-id
+PIDFile=%t/it-tools-app.pid
+Type=forking
+
+[Install]
+WantedBy=default.target
