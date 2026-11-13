@@ -50,7 +50,7 @@ buildah config --entrypoint=/ \
     --label="org.nethserver.tcp-ports-demand=1" \
     --label="org.nethserver.rootfull=0" \
     --label="org.nethserver.min-core=3.0.0" \
-    --label="org.nethserver.images=docker.io/corentinth/it-tools:latest" \
+    --label="org.nethserver.images=docker.io/corentinth/it-tools:2024.10.22-7ca5933" \
     "${container}"
 # Commit the image
 buildah commit "${container}" "${repobase}/${reponame}"
